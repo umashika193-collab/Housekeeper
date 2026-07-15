@@ -199,6 +199,10 @@ class Game {
     // イベントのセットアップ
     this.setupUIEvents();
     
+    // ゲームループ用変数
+    this.accumulator = 0;
+    this.STEP = 1000 / 60; // 60 FPS固定タイムステップ
+    
     // ゲームループ開始
     this.lastTime = 0;
     requestAnimationFrame((t) => this.loop(t));
@@ -244,6 +248,9 @@ class Game {
     if (this.btnStartGame) {
       this.btnStartGame.addEventListener('click', () => {
         if (this.state === 'TITLE') {
+          // モバイル等のAudioContextアクティベート
+          window.AudioManager.init();
+          
           this.titleScreen.classList.add('hidden');
           this.state = 'PLAY';
           this.initStage('1-1'); // 1-1からスタート
