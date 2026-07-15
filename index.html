@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>客室清掃員奮闘記～令和編～ - アクションゲーム</title>
+  <meta name="description" content="新人清掃員が強力洗剤を求めてホテルの客室を清掃する、HTML5 CanvasとWeb Audio APIで作成されたレトロ2Dアクションゲーム。">
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- PWA Settings -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2c1e45">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="客室清掃員">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <!-- Google Fonts for retro/modern style -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@300;400;600;800&family=Yuji+Syuku&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app-container">
+    <header>
+      <h1 id="game-title">客室清掃員奮闘記</h1>
+      <p id="game-subtitle">〜 令和編 〜</p>
+    </header>
+
+    <main id="game-layout">
+      <!-- Left side: Retro Arcade Console -->
+      <div id="arcade-cabinet">
+        <div class="cabinet-screen-frame">
+          <div class="cabinet-screen-glare"></div>
+          <canvas id="game-canvas" width="512" height="448"></canvas>
+          
+          <!-- PWA Installation Modal -->
+          <div id="pwa-modal" class="pwa-hidden">
+            <div class="pwa-modal-content">
+              <button id="pwa-modal-close" class="pwa-close-btn" title="閉じる">&times;</button>
+              
+              <div class="pwa-icon-container">
+                <div class="pwa-icon-dummy">🧹</div>
+              </div>
+              
+              <h3 class="pwa-title">客室清掃員奮闘記</h3>
+              <p class="pwa-subtitle">アプリとしてホーム画面に追加</p>
+
+              <!-- パターン1: インストール可能（Chrome/Androidなど） -->
+              <div id="pwa-install-area" class="pwa-hidden">
+                <p class="pwa-desc">全画面表示で操作性が向上し、オフラインでもプレイ可能になります！</p>
+                <button id="pwa-btn-install" class="pwa-action-btn">インストールする</button>
+              </div>
+
+              <!-- パターン2: iOS Safari 誘導ガイド -->
+              <div id="pwa-guide-area" class="pwa-hidden">
+                <p class="pwa-desc">Safariでホーム画面に追加してアプリとして遊べます！</p>
+                <div class="pwa-steps">
+                  <div class="pwa-step">
+                    <span class="pwa-step-num">1</span>
+                    <span>ブラウザ下部の<strong>共有ボタン</strong> <span class="share-icon">📤</span> をタップ</span>
+                  </div>
+                  <div class="pwa-step">
+                    <span class="pwa-step-num">2</span>
+                    <span>メニューから<strong>「ホーム画面に追加」</strong> <span class="plus-icon">➕</span> をタップ</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- パターン3: アプリ内ブラウザから開かれている -->
+              <div id="pwa-inapp-area" class="pwa-hidden">
+                <p class="pwa-desc">現在、アプリ内ブラウザ（簡易表示）で開かれています。アプリ化するには <strong id="pwa-target-browser">Safari</strong> で開いてください。</p>
+                <p class="pwa-desc-sub" id="pwa-inapp-instructions">右上のメニューからブラウザで開くを選択してください。</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overlay screens for states (controlled via CSS and JS) -->
+          <div id="screen-overlay" class="hidden">
+            <div id="overlay-content">
+              <h2 id="overlay-title">PAUSED</h2>
+              <p id="overlay-msg">Press ESC or click Resume to continue</p>
+              <button id="btn-resume-overlay" class="control-btn">RESUME</button>
+            </div>
+          </div>
+
+          <!-- Title Screen Overlay -->
+          <div id="title-screen">
+            <div class="title-content">
+              <h1 class="title-logo">客室清掃員奮闘記</h1>
+              <p class="title-sub">〜 令和編 〜</p>
+              <button id="btn-start-game" class="blink-text">PRESS START</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Arcade Controls Area -->
+        <div id="cabinet-controls">
+          <div class="control-pad">
+            <button id="btn-sound" class="arcade-btn green" title="サウンドON/OFF">
+              <span class="btn-label">SOUND</span>
+              <span class="btn-indicator" id="sound-indicator">ON</span>
+            </button>
+            <button id="btn-pause" class="arcade-btn yellow" title="一時停止/再開">
+              <span class="btn-label">PAUSE</span>
+            </button>
+            <button id="btn-restart" class="arcade-btn red" title="最初からやり直す">
+              <span class="btn-label">RESET</span>
+            </button>
+          </div>
+          <div class="cabinet-brand">16-BIT RETRO SYSTEM</div>
+        </div>
+      </div>
+
+      <!-- Right side: Instructions and Info Panel -->
+      <div id="info-panel">
+        <div class="panel-section">
+          <h2><span class="icon">🎮</span> CONTROLS</h2>
+          <table class="controls-table">
+            <tr>
+              <th>ACTION</th>
+              <th>KEYBOARD</th>
+            </tr>
+            <tr>
+              <td>左右移動</td>
+              <td><span class="key">←</span> <span class="key">→</span> または <span class="key">A</span> <span class="key">D</span></td>
+            </tr>
+            <tr>
+              <td>ジャンプ</td>
+              <td><span class="key">Space</span> または <span class="key">Z</span> <span class="key">W</span></td>
+            </tr>
+            <tr>
+              <td>ダッシュ</td>
+              <td><span class="key">Shift</span> または <span class="key">X</span></td>
+            </tr>
+            <tr>
+              <td>ポーズ</td>
+              <td><span class="key">Esc</span> または <span class="key">P</span></td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="panel-section">
+          <h2><span class="icon">✨</span> GAME RULES</h2>
+          <ul class="rules-list">
+            <li><strong>強力洗剤パワーアップ:</strong> ハテナブロックから出現する <span>万能洗剤</span> を取ると、<strong>ベテラン清掃員</strong>（業務用掃除機装備）にパワーアップ！客の妨害を1回耐えられます。</li>
+            <li><strong>ハンディモップパワーアップ:</strong> ベテラン状態でハテナブロックを叩くと <span>赤いハンディモップ</span> が出現！取ると<strong>モップ清掃員</strong>（赤の制服）になり、<strong>Shift/Xキー</strong>でモップを投げて敵を倒せます。</li>
+            <li><strong>被弾ペナルティ:</strong> モップ状態またはベテラン状態で客からダメージを受けると、一気に<strong>通常状態（見習い）</strong>にダウングレードします。</li>
+            <li><strong>客の対応（倒し方）:</strong> 歩きスマホをしている迷惑な客は、頭の上から<strong>踏みつける</strong>か、投げた<strong>ハンディモップを当てる</strong>ことで排除できます。</li>
+            <li><strong>フロア遷移:</strong> 1-1（ホテルの廊下）の奥のゲートを通過すると、1-2（散らかったスイートルーム）に進みます。1-2の奥まで清掃できれば完全クリア！</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+
+    <!-- モバイル用 仮想コントローラー -->
+    <div id="virtual-controller" class="hidden">
+      <div class="d-pad-area">
+        <div class="d-pad">
+          <button id="v-up" class="d-btn up"></button>
+          <button id="v-right" class="d-btn right"></button>
+          <button id="v-down" class="d-btn down"></button>
+          <button id="v-left" class="d-btn left"></button>
+          <div class="d-pad-center"></div>
+        </div>
+      </div>
+      
+      <div class="action-area">
+        <div class="sfc-buttons">
+          <button id="v-x" class="action-btn x"><span class="label">X</span></button>
+          <button id="v-y" class="action-btn y"><span class="label">Y</span></button>
+          <button id="v-a" class="action-btn a"><span class="label">A</span></button>
+          <button id="v-b" class="action-btn b"><span class="label">B</span></button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>&copy; 2026 Hotel Cleaner Bros. Project. Built with HTML5 Canvas & Web Audio API.</p>
+    </footer>
+  </div>
+
+  <!-- Game Scripts -->
+  <script src="js/pwa.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/enemy.js"></script>
+  <script src="js/tilemap.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
