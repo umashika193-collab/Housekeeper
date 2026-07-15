@@ -370,8 +370,21 @@ class Game {
    * ゲームループ
    */
   loop(timestamp) {
-    // デルタタイムは使用せず、レトロゲームのように固定フレームレート(60fps)基準で動作
-    this.update();
+    if (!this.lastTime) this.lastTime = timestamp;
+    let dt = timestamp - this.lastTime;
+    this.lastTime = timestamp;
+
+    // タブがバックグラウンドに回った際の巨大なdtを防ぐ
+    if (dt > 100) dt = 100;
+
+    this.accumulator += dt;
+
+    // 固定タイムステップ(16.6ms)ごとにupdateを呼び出す
+    while (this.accumulator >= this.STEP) {
+      this.update();
+      this.accumulator -= this.STEP;
+    }
+
     this.draw();
     
     // キー入力更新 (previousKeysの書き換え用)

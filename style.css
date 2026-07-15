@@ -636,22 +636,17 @@ footer {
    Mobile Virtual Controller Styles
    ========================================== */
 
-/* 仮想コントローラーの基本スタイル */
+/* 仮想コントローラーの基本スタイル (画面両端へのオーバーレイ) */
 #virtual-controller {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 600px; /* モバイル画面幅の最大に合わせる */
-  padding: 20px 10px;
-  margin: 0 auto;
+  height: 100%;
+  pointer-events: none; /* コンテナ自体はタッチ透過 */
   user-select: none;
   -webkit-user-select: none;
-  /* スマホの指が隠れないように、独自の専用領域として確保する */
-  background: rgba(15, 12, 27, 0.95);
-  border-top: 2px solid #2f275a;
-  border-radius: 12px 12px 0 0;
-  box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
   z-index: 100;
 }
 
@@ -659,12 +654,16 @@ footer {
   display: none !important;
 }
 
+.d-pad-area, .action-area {
+  pointer-events: auto; /* ボタン領域はタッチを受け付ける */
+  position: absolute;
+  bottom: 20px;
+  opacity: 0.65;
+}
+
 /* D-Pad (十字キー) */
 .d-pad-area {
-  flex: 1;
-  display: flex;
-  justify-content: flex-start;
-  padding-left: 20px;
+  left: 20px;
 }
 
 .d-pad {
@@ -730,10 +729,7 @@ footer {
 
 /* アクションボタン (SFC風) */
 .action-area {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  padding-right: 20px;
+  right: 20px;
 }
 
 .sfc-buttons {
@@ -959,42 +955,6 @@ footer {
 
   #game-canvas {
     object-fit: contain; /* 横画面いっぱいに広げるが、アスペクト比は保つ */
-  }
-
-  /* 仮想コントローラーのオーバーレイ化 */
-  #virtual-controller {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%; /* 全画面を覆って配置自由度を上げる */
-    max-width: none;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    pointer-events: none; /* コンテナ自体はクリックを透過 */
-    padding: 0;
-    z-index: 100;
-  }
-
-  /* ボタンは個別にクリック可能にする */
-  .d-pad-area, .action-area {
-    pointer-events: auto;
-    position: absolute;
-    bottom: 20px; /* 画面下からの余白 */
-    opacity: 0.6; /* 半透明にしてゲーム画面を見えやすく */
-  }
-
-  /* 十字キーは左下 */
-  .d-pad-area {
-    left: 40px;
-    padding: 0;
-  }
-
-  /* アクションボタンは右下 */
-  .action-area {
-    right: 40px;
-    padding: 0;
   }
 
   /* ボタンを少し大きくして押しやすくする */
