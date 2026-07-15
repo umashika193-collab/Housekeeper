@@ -60,35 +60,83 @@ class InputHandler {
       'v-y': 'ShiftLeft'   // Y(左)もダッシュ/攻撃
     };
 
-    // ボタン要素にタッチイベントを一括登録
-    Object.keys(keyMap).forEach(btnId => {
-      const btn = document.getElementById(btnId);
-      if (!btn) return;
-
-      const code = keyMap[btnId];
-
-      const handlePress = (e) => {
-        e.preventDefault(); // スクロール等のデフォルト動作を抑制
-        this.keys[code] = true;
-        btn.classList.add('active'); // 押下時の見た目を適用
-      };
-
-      const handleRelease = (e) => {
-        e.preventDefault();
+    // スマホのスライド操作（YからBへ指を滑らせる等）に対応するため、
+    // 仮想コントローラー全体でタッチ位置を常に監視し、指の下にあるボタンを判定する
+    const handleTouches = (e) => {
+      e.preventDefault();
+      
+      // まず全仮想ボタンの入力をリセット
+      Object.values(keyMap).forEach(code => {
         this.keys[code] = false;
-        btn.classList.remove('active');
-      };
+      });
+      Object.keys(keyMap).forEach(btnId => {
+        const btn = document.getElementById(btnId);
+        if (btn) btn.classList.remove('active');
+      });
 
-      // タッチイベントのバインド
-      btn.addEventListener('touchstart', handlePress, { passive: false });
-      btn.addEventListener('touchend', handleRelease, { passive: false });
-      btn.addEventListener('touchcancel', handleRelease, { passive: false });
+      // 現在画面に触れている全ての指の座標から対象ボタンを判定
+      for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+        
+        if (element) {
+          // 触れている要素がボタン、またはボタン内のテキスト(label)なら最も近いボタンを取得
+          const targetBtn = element.closest('.action-btn, .d-btn');
+          
+          if (targetBtn && keyMap[targetBtn.id]) {
+            const code = keyMap[targetBtn.id];
+            this.keys[code] = true;
+            targetBtn.classList.add('active');
+          }
+        }
+      }
+    };
 
-      // PC上でマウスクリックでもデバッグできるように一応対応
-      btn.addEventListener('mousedown', handlePress);
-      btn.addEventListener('mouseup', handleRelease);
-      btn.addEventListener('mouseleave', handleRelease);
-    });
+    // 仮想コントローラー領域全体にイベントをバインド
+    virtualController.addEventListener('touchstart', handleTouches, { passive: false });
+    virtualController.addEventListener('touchmove', handleTouches, { passive: false });
+    virtualController.addEventListener('touchend', handleTouches, { passive: false });
+    virtualController.addEventListener('touchcancel', handleTouches, { passive: false });
+
+    // PCデバッグ用のマウスイベント（マウスは1点のみなのでシンプルに）
+    let isMouseDown = false;
+    const handleMouse = (e) => {
+      if (!isMouseDown && e.type !== 'mousedown') return;
+      if (e.type === 'mousedown') isMouseDown = true;
+      if (e.type === 'mouseup' || e.type === 'mouseleave') {
+        isMouseDown = false;
+        // マウスを離したら全てリセット
+        Object.values(keyMap).forEach(code => this.keys[code] = false);
+        Object.keys(keyMap).forEach(btnId => {
+          const btn = document.getElementById(btnId);
+          if (btn) btn.classList.remove('active');
+        });
+        return;
+      }
+      
+      // mousemove または mousedown の処理
+      // (PCでもドラッグでボタン間を移動できるようにする)
+      Object.values(keyMap).forEach(code => this.keys[code] = false);
+      Object.keys(keyMap).forEach(btnId => {
+        const btn = document.getElementById(btnId);
+        if (btn) btn.classList.remove('active');
+      });
+
+      const element = document.elementFromPoint(e.clientX, e.clientY);
+      if (element) {
+        const targetBtn = element.closest('.action-btn, .d-btn');
+        if (targetBtn && keyMap[targetBtn.id]) {
+          const code = keyMap[targetBtn.id];
+          this.keys[code] = true;
+          targetBtn.classList.add('active');
+        }
+      }
+    };
+
+    virtualController.addEventListener('mousedown', handleMouse);
+    virtualController.addEventListener('mousemove', handleMouse);
+    virtualController.addEventListener('mouseup', handleMouse);
+    virtualController.addEventListener('mouseleave', handleMouse);
   }
 
   /**

@@ -128,7 +128,7 @@ header {
   box-shadow: 
     inset 0 0 20px rgba(0, 0, 0, 0.9),
     0 0 15px rgba(0, 212, 255, 0.1);
-  aspect-ratio: 512/448;
+  aspect-ratio: 4/3;
 }
 
 /* Cathode Ray Tube Glare Effect */
@@ -658,7 +658,7 @@ footer {
   pointer-events: auto; /* ボタン領域はタッチを受け付ける */
   position: absolute;
   bottom: 20px;
-  opacity: 0.65;
+  opacity: 1.0;
 }
 
 /* D-Pad (十字キー) */
@@ -741,8 +741,8 @@ footer {
 
 .action-btn {
   position: absolute;
-  width: 45px;
-  height: 45px;
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
   border: none;
   outline: none;
@@ -774,10 +774,10 @@ footer {
 }
 
 /* SFCカラー定義 */
-.action-btn.x { top: 0; left: 48px; background: #00387b; } /* 青 */
-.action-btn.y { top: 48px; left: 0; background: #009b45; } /* 緑 */
-.action-btn.b { bottom: 0; left: 48px; background: #f3b604; } /* 黄 */
-.action-btn.a { top: 48px; right: 0; background: #e10b1a; } /* 赤 */
+.action-btn.x { top: 0; left: 42px; background: #00387b; } /* 青 */
+.action-btn.y { top: 42px; left: 0; background: #009b45; } /* 緑 */
+.action-btn.b { bottom: 0; left: 42px; background: #f3b604; } /* 黄 */
+.action-btn.a { top: 42px; right: 0; background: #e10b1a; } /* 赤 */
 
 /* モバイル時の全体レイアウト調整 */
 @media (max-width: 800px), (hover: none) and (pointer: coarse) {
@@ -913,6 +913,18 @@ footer {
   50% { opacity: 0; }
 }
 
+.version-display {
+  position: absolute;
+  bottom: 10px;
+  right: 15px;
+  font-family: var(--font-pixel);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-shadow: 1px 1px 2px #000;
+  pointer-events: none;
+}
+
+
 /* Mobile Landscape (横画面) Layout Adjustments */
 @media (orientation: landscape) and (max-height: 600px), (orientation: landscape) and (hover: none) and (pointer: coarse) {
   body {
@@ -925,7 +937,11 @@ footer {
   #app-container {
     height: 100vh;
     height: 100dvh;
-    display: block; /* gridやflexを解除してフルスクリーン化 */
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
   }
 
   /* ヘッダー、情報パネル、筐体下部ボタンを隠す */
@@ -939,9 +955,12 @@ footer {
     border-radius: 0;
     padding: 0;
     box-shadow: none;
-    width: 100vw;
     height: 100dvh;
+    width: calc(100dvh * 4 / 3);
+    max-width: 100vw;
     background: #000;
+    margin: 0 auto;
+    position: relative;
   }
 
   .cabinet-screen-frame {
@@ -967,4 +986,26 @@ footer {
     transform: scale(1.1) rotate(-15deg);
     transform-origin: bottom right;
   }
+  #virtual-controller {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .d-pad-area, .action-area {
+    pointer-events: auto;
+    position: absolute;
+    bottom: 20px;
+    opacity: 1.0;
+  }
+  .d-pad-area {
+    left: 20px;
+  }
+  .action-area {
+    right: 20px;
+  }
+
 }
