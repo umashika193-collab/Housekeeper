@@ -1,15 +1,15 @@
-const CACHE_NAME = 'hotel-cleaner-v4';
+const CACHE_NAME = 'hotel-cleaner-v5';
 const ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './js/input.js',
-  './js/audio.js',
-  './js/player.js',
-  './js/enemy.js',
-  './js/tilemap.js',
-  './js/game.js',
-  './js/pwa.js',
+  './style.css?v=1.0.2',
+  './js/input.js?v=1.0.2',
+  './js/audio.js?v=1.0.2',
+  './js/player.js?v=1.0.2',
+  './js/enemy.js?v=1.0.2',
+  './js/tilemap.js?v=1.0.2',
+  './js/game.js?v=1.0.2',
+  './js/pwa.js?v=1.0.2',
   './manifest.json'
 ];
 
