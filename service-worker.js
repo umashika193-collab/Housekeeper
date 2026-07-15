@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hotel-cleaner-v2';
+const CACHE_NAME = 'hotel-cleaner-v3';
 const ASSETS = [
   './',
   './index.html',
